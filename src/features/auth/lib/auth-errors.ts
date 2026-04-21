@@ -110,6 +110,26 @@ function isNetworkError(shape: ErrorShape): boolean {
  *   5. Rede (TypeError ou substrings clássicas).
  *   6. Fallback `UNEXPECTED_ERROR`.
  */
+/**
+ * Verifica se um erro é de rate limit (AC-07).
+ *
+ * Útil para o caller decidir se deve mostrar countdown ou mensagem simples.
+ * Aceita o `unknown` original ou a string já mapeada por `mapAuthError`.
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (typeof error === "string") {
+    return error === AUTH_MESSAGES.RATE_LIMITED;
+  }
+  const shape = extractErrorShape(error);
+  const msg = shape.message.toLowerCase();
+  return (
+    shape.status === 429 ||
+    msg.includes("rate limit") ||
+    msg.includes("too many requests") ||
+    msg.includes("429")
+  );
+}
+
 export function mapAuthError(error: unknown): string {
   const shape = extractErrorShape(error);
   const msg = shape.message.toLowerCase();

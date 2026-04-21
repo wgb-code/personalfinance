@@ -123,12 +123,74 @@ export const AUTH_MESSAGES = {
   LOGIN_PAGE_TITLE: "Entrar — Organizador Financeiro",
 
   /**
+   * Microcopy de UI da tela de cadastro (AC-01). Centralizada aqui para
+   * evitar string mágica nos componentes (anti-vibe coding) e permitir
+   * que testes assertem o texto exato com `toBe`.
+   */
+  REGISTER_TITLE: "Criar conta",
+  REGISTER_SUBTITLE: "Preencha os dados abaixo para começar.",
+  REGISTER_SUBMIT: "Criar conta",
+  REGISTER_SUBMITTING: "Criando conta…",
+  REGISTER_EMAIL_LABEL: "Email",
+  REGISTER_EMAIL_PLACEHOLDER: "voce@exemplo.com",
+  REGISTER_PASSWORD_LABEL: "Senha",
+  REGISTER_PASSWORD_PLACEHOLDER: "Sua senha",
+  REGISTER_PASSWORD_CONFIRM_LABEL: "Confirmar senha",
+  REGISTER_PASSWORD_CONFIRM_PLACEHOLDER: "Repita a senha",
+  REGISTER_FULL_NAME_LABEL: "Nome completo",
+  REGISTER_FULL_NAME_PLACEHOLDER: "Seu nome",
+  REGISTER_AVATAR_LABEL: "Foto de perfil",
+  REGISTER_AVATAR_HINT: "Opcional — JPEG, PNG ou WebP, até 2MB",
+  REGISTER_GO_TO_LOGIN: "Já tenho conta",
+  REGISTER_PAGE_TITLE: "Criar conta — Organizador Financeiro",
+
+  /**
+   * Microcopy do modal de sessão expirada (AC-09 — Auto-logout por inatividade).
+   */
+  SESSION_EXPIRED_TITLE: "Sessão expirada",
+  SESSION_EXPIRED_MESSAGE: "Sua sessão expirou por inatividade",
+  SESSION_EXPIRED_BUTTON: "OK",
+
+  /**
    * Microcopy do toggle "mostrar/ocultar senha" no `<Field>` reutilizável.
    * Os textos VIRAM `aria-label` (não há texto visível), portanto precisam
    * ser auto-suficientes fora de contexto visual (a11y).
    */
   PASSWORD_SHOW: "Mostrar senha",
   PASSWORD_HIDE: "Ocultar senha",
+
+  /**
+   * Microcopy de UI da tela de "Esqueci minha senha" (AC-11).
+   *
+   * `FORGOT_PASSWORD_SUCCESS` é propositadamente genérica (Lei 9):
+   * NUNCA revela se o email existe ou não no sistema, evitando
+   * enumeração de contas.
+   */
+  FORGOT_PASSWORD_TITLE: "Recuperar senha",
+  FORGOT_PASSWORD_SUBTITLE: "Informe seu email para receber as instruções.",
+  FORGOT_PASSWORD_SUBMIT: "Enviar instruções",
+  FORGOT_PASSWORD_SUBMITTING: "Enviando…",
+  FORGOT_PASSWORD_EMAIL_LABEL: "Email",
+  FORGOT_PASSWORD_EMAIL_PLACEHOLDER: "voce@exemplo.com",
+  FORGOT_PASSWORD_SUCCESS:
+    "Se o email existir, enviamos as instruções de recuperação.",
+  FORGOT_PASSWORD_GO_TO_LOGIN: "Voltar para login",
+  FORGOT_PASSWORD_PAGE_TITLE: "Recuperar senha — Organizador Financeiro",
+
+  /**
+   * Microcopy de UI da tela de "Redefinir senha" (AC-12).
+   */
+  RESET_PASSWORD_TITLE: "Redefinir senha",
+  RESET_PASSWORD_SUBTITLE: "Escolha uma nova senha para sua conta.",
+  RESET_PASSWORD_SUBMIT: "Salvar nova senha",
+  RESET_PASSWORD_SUBMITTING: "Salvando…",
+  RESET_PASSWORD_NEW_LABEL: "Nova senha",
+  RESET_PASSWORD_NEW_PLACEHOLDER: "Sua nova senha",
+  RESET_PASSWORD_CONFIRM_LABEL: "Confirmar nova senha",
+  RESET_PASSWORD_CONFIRM_PLACEHOLDER: "Repita a nova senha",
+  RESET_PASSWORD_SUCCESS: "Senha alterada com sucesso!",
+  RESET_PASSWORD_GO_TO_LOGIN: "Ir para login",
+  RESET_PASSWORD_PAGE_TITLE: "Redefinir senha — Organizador Financeiro",
 } as const;
 
 export type AuthMessageKey = keyof typeof AUTH_MESSAGES;
@@ -210,6 +272,47 @@ export const DEFAULT_REDIRECT = "/" as const;
 
 export const MAX_REDIRECT_LENGTH = 2048;
 
+/**
+ * Tempo de inatividade antes do auto-logout (AC-09).
+ *
+ * 4 horas é um balanço entre segurança (sessão não fica aberta
+ * indefinidamente) e UX (usuário não é deslogado se sair para almoçar).
+ *
+ * Para testes, use a prop `timeout` do `useIdleTimer` para encurtar.
+ */
+export const IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 horas
+
+/**
+ * Eventos que resetam o timer de inatividade (AC-09).
+ *
+ * Lista derivada de padrões de detecção de atividade em apps financeiros:
+ *   - `mousemove`, `keydown`, `click`: interações primárias
+ *   - `scroll`, `touchstart`: interações mobile/touch
+ *   - `focus`: retorno de outra aba/janela
+ *
+ * NOTA: `mousedown` e `mouseup` são redundantes com `click` e omitidos
+ * para evitar re-renders desnecessários. `wheel` é um subset de `scroll`.
+ */
+export const IDLE_EVENTS = [
+  "mousemove",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "click",
+  "focus",
+] as const;
+
+export type IdleEvent = (typeof IDLE_EVENTS)[number];
+
 export const REDIRECT_MESSAGES = {
   DISCARDED: "redirect descartado",
 } as const;
+
+/**
+ * Tempo de espera após rate limit (AC-07).
+ *
+ * O Supabase usa janelas variáveis por endpoint, mas o fallback comum
+ * é 60 segundos. Exibimos este countdown para UX, independente da
+ * janela real do servidor.
+ */
+export const RATE_LIMIT_COUNTDOWN_SECONDS = 60;

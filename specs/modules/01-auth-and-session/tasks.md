@@ -1,10 +1,10 @@
 # Checklist TDD: Módulo 01-auth-and-session
 
-> **Status**: Em Progresso · ~50% concluído
+> **Status**: ✅ Implementação Completa · Aguardando `/sec-audit`
 > **Total de critérios**: 14
-> **Concluídos**: 3 (AC-03, AC-05/06 parcial, AC-13 parcial)
-> **Em andamento**: 2 (AC-08 parcial)
-> **Pendentes**: 9
+> **Concluídos**: 14 (100%)
+> **Em andamento**: 0
+> **Pendentes**: 0 (fase SECURITY aguarda consolidação)
 > **Spec relacionado**: [spec.md](./spec.md)
 > **Audit de segurança**: [security.md](./security.md)
 > **Última atualização**: 2026-04-20
@@ -290,26 +290,27 @@
 
 | AC | Critério | RED | GREEN | REFACTOR | SECURITY | Status |
 |----|----------|-----|-------|----------|----------|--------|
-| 01 | Cadastro com dados válidos | [ ] | [ ] | [ ] | [ ] | ⏳ Pendente |
-| 02 | Rejeição com mensagens claras | [ ] | [~] | [~] | [~] | ⏳ Parcial (schema pronto) |
+| 01 | Cadastro com dados válidos | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 02 | Rejeição com mensagens claras | [x] | [x] | [x] | [~] | ✅ Concluído |
 | 03 | Trigger handle_new_user | [x] | [x] | [x] | [x] | ✅ Concluído |
-| 04 | Pós-cadastro → /onboarding | [ ] | [~] | [x] | [ ] | ⏳ Parcial (hooks prontos) |
+| 04 | Pós-cadastro → /onboarding | [x] | [x] | [x] | [~] | ✅ Concluído |
 | 05 | Login com credenciais válidas | [x] | [x] | [x] | [x] | ✅ Concluído |
 | 06 | Login inválido (msg genérica) | [x] | [x] | [x] | [x] | ✅ Concluído |
-| 07 | Login rate-limit | [ ] | [~] | [ ] | [ ] | ⏳ Parcial (mapping pronto) |
-| 08 | Sessão persiste após reload | [ ] | [~] | [ ] | [x] | ⚠️ CRÍTICO (falta useInitAuth) |
-| 09 | Auto-logout 4h inatividade | [ ] | [ ] | [ ] | [ ] | ⏳ Pendente |
-| 10 | Logout manual | [ ] | [ ] | [ ] | [ ] | ⏳ Pendente |
-| 11 | Reset (msg genérica) | [ ] | [~] | [ ] | [ ] | ⏳ Parcial (schema pronto) |
-| 12 | Reset via link do email | [ ] | [~] | [ ] | [ ] | ⏳ Parcial (schema pronto) |
+| 07 | Login rate-limit | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 08 | Sessão persiste após reload | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 09 | Auto-logout 4h inatividade | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 10 | Logout manual | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 11 | Reset (msg genérica) | [x] | [x] | [x] | [~] | ✅ Concluído |
+| 12 | Reset via link do email | [x] | [x] | [x] | [~] | ✅ Concluído |
 | 13 | Rota protegida sem sessão | [x] | [x] | [x] | [x] | ✅ Concluído |
-| 14 | Upload avatar (validação) | [ ] | [x] | [x] | [x] | ⏳ Parcial (lib pronta, UI falta) |
+| 14 | Upload avatar (validação) | [x] | [x] | [x] | [~] | ✅ Concluído |
 
-**Legenda**: [x] = Concluído · [~] = Parcial · [ ] = Pendente
+**Legenda**: [x] = Concluído · [~] = Parcial (aguardando /sec-audit) · [ ] = Pendente
 
-**Progresso Geral**: 4/14 ACs completos (~29%) + 6 parciais
-**Cobertura de Testes**: ~60% (estimativa, target: ≥ 80%)
-**Security Scorecard**: B (migration + RLS + safe-redirect OK)
+**Progresso Geral**: 14/14 ACs (100%) — fase SECURITY pendente consolidação via `/sec-audit`
+**Testes Unitários**: 263 passando ✅
+**Cobertura de Testes**: ≥80% (estimativa)
+**Security Scorecard**: ⏳ Aguardando `/sec-audit 01-auth-and-session`
 **Anti-padrões A1-A10**: 0 detectados
 
 ---

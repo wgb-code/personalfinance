@@ -16,10 +16,12 @@ import {
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Field } from "@/components/shared/Field"
+import { RateLimitCountdown } from "@/features/auth/components/RateLimitCountdown"
 import { useSignIn } from "@/features/auth/hooks/useSignIn"
 import { usePostAuthRedirect } from "@/features/auth/hooks/usePostAuthRedirect"
+import { isRateLimitError } from "@/features/auth/lib/auth-errors"
 import { loginSchema, type LoginInput } from "@/features/auth/lib/auth-schemas"
-import { AUTH_MESSAGES } from "@/features/auth/lib/constants"
+import { AUTH_MESSAGES, RATE_LIMIT_COUNTDOWN_SECONDS } from "@/features/auth/lib/constants"
 
 /**
  * Tipo de INPUT do `loginSchema` — usado pelo RHF para gerenciar o
@@ -56,13 +58,19 @@ type LoginFormValues = z.input<typeof loginSchema>
 export function LoginForm() {
   const { navigateAfterAuth } = usePostAuthRedirect()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isRateLimited, setIsRateLimited] = useState(false)
 
   const { mutate, isPending } = useSignIn({
     onSuccess: () => {
       navigateAfterAuth()
     },
     onError: (msg) => {
-      setSubmitError(msg)
+      if (isRateLimitError(msg)) {
+        setIsRateLimited(true)
+        setSubmitError(null)
+      } else {
+        setSubmitError(msg)
+      }
     },
   })
 
@@ -117,6 +125,17 @@ export function LoginForm() {
           />
 
           {/*
+           * AC-07: Countdown de rate limit exibido quando Supabase retorna
+           * 429. O botão fica desabilitado durante o countdown.
+           */}
+          {isRateLimited ? (
+            <RateLimitCountdown
+              seconds={RATE_LIMIT_COUNTDOWN_SECONDS}
+              onExpire={() => setIsRateLimited(false)}
+            />
+          ) : null}
+
+          {/*
            * `aria-live="polite"` no Alert + `role="alert"` garante que
            * screen readers anunciem novos erros sem interromper o usuário.
            * Re-render limpa o nó automaticamente quando `submitError` vira
@@ -131,14 +150,14 @@ export function LoginForm() {
           ) : null}
 
           {/*
-           * Submit fica desabilitado APENAS por `isPending`. Não bloquear
-           * por `!isValid`: o usuário deve poder TENTAR enviar e ver os
-           * erros inline (RN: "fail loud, fail accessible").
+           * Submit fica desabilitado por `isPending` OU `isRateLimited`
+           * (AC-07). Não bloquear por `!isValid`: o usuário deve poder
+           * TENTAR enviar e ver os erros inline (RN: "fail loud, fail accessible").
            */}
           <Button
             type="submit"
             size="lg"
-            disabled={isPending}
+            disabled={isPending || isRateLimited}
             aria-busy={isPending}
             className="w-full"
           >

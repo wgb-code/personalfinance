@@ -12,7 +12,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AUTH_MESSAGES } from "@/features/auth/lib/constants";
-import { mapAuthError } from "@/features/auth/lib/auth-errors";
+import { mapAuthError, isRateLimitError } from "@/features/auth/lib/auth-errors";
 
 describe("mapAuthError — credenciais inválidas (Lei 9)", () => {
   it.each<[string, unknown]>([
@@ -108,5 +108,27 @@ describe("mapAuthError — fallback (UNEXPECTED_ERROR)", () => {
     ["objeto com message não-string", { message: 123 }],
   ])("%s → UNEXPECTED_ERROR", (_label, input) => {
     expect(mapAuthError(input)).toBe(AUTH_MESSAGES.UNEXPECTED_ERROR);
+  });
+});
+
+describe("isRateLimitError — AC-07", () => {
+  it.each<[string, unknown]>([
+    ["string já mapeada RATE_LIMITED", AUTH_MESSAGES.RATE_LIMITED],
+    ["Error('rate limit')", new Error("rate limit exceeded")],
+    ["objeto status 429", { status: 429 }],
+    ["Error('Too many requests')", new Error("Too many requests")],
+    ["Error('HTTP 429')", new Error("HTTP 429: Too Many Requests")],
+  ])("%s → true", (_label, input) => {
+    expect(isRateLimitError(input)).toBe(true);
+  });
+
+  it.each<[string, unknown]>([
+    ["Error credencial inválida", new Error("Invalid login credentials")],
+    ["string qualquer", "algum outro erro"],
+    ["null", null],
+    ["undefined", undefined],
+    ["objeto sem rate limit", { status: 401, message: "Unauthorized" }],
+  ])("%s → false", (_label, input) => {
+    expect(isRateLimitError(input)).toBe(false);
   });
 });

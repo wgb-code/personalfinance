@@ -24,34 +24,10 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
-
-function RegisterPagePlaceholder() {
-  // TODO(AC-02): substituir por <RegisterPage /> real.
-  return (
-    <main>
-      <h1>Cadastro</h1>
-    </main>
-  );
-}
-
-function ForgotPasswordPagePlaceholder() {
-  // TODO(AC-11): substituir por <ForgotPasswordPage /> real.
-  return (
-    <main>
-      <h1>Esqueci minha senha</h1>
-    </main>
-  );
-}
-
-function ResetPasswordPagePlaceholder() {
-  // TODO(AC-12): substituir por <ResetPasswordPage /> real.
-  return (
-    <main>
-      <h1>Redefinir senha</h1>
-    </main>
-  );
-}
+import { RegisterPage } from "@/features/auth/pages/RegisterPage";
+import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 
 function HomePlaceholder() {
   // TODO(AC-04): redirecionar para /dashboard ou /onboarding com base
@@ -109,9 +85,9 @@ function NotFoundPlaceholder() {
 
 export const appRouter = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPagePlaceholder /> },
-  { path: "/forgot-password", element: <ForgotPasswordPagePlaceholder /> },
-  { path: "/reset-password", element: <ResetPasswordPagePlaceholder /> },
+  { path: "/register", element: <RegisterPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/reset-password", element: <ResetPasswordPage /> },
   {
     element: <ProtectedRoute />,
     children: [
