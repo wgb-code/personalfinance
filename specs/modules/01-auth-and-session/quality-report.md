@@ -1,8 +1,8 @@
 # Quality Report — Módulo 01-auth-and-session
 
-> **Gerado**: 2026-04-20 22:55
+> **Gerado**: 2026-04-20 23:05
 > **Branch**: `feat/01-auth-and-session`
-> **Duração total**: ~4s
+> **Duração total**: ~5s
 
 ---
 
@@ -20,7 +20,7 @@
 
 | Suíte | Resultado | Detalhes |
 |-------|-----------|----------|
-| **Unit** | ✅ 263/263 | Todos passando |
+| **Unit** | ✅ 334/334 | Todos passando |
 | **Integration** | ⏳ | Requer ambiente Supabase local |
 | **Component (browser)** | ⏳ | Mesmos arquivos, Playwright provider |
 | **E2E** | ⏳ | Stub — ambiente E2E não configurado |
@@ -33,31 +33,28 @@
 
 | Métrica | Valor | Alvo | Status |
 |---------|-------|------|--------|
-| **Statements** | 80.03% | ≥ 80% | ✅ |
-| **Branches** | 71.87% | ≥ 75% | ⚠️ -3.13% |
-| **Functions** | 66.66% | ≥ 80% | ❌ -13.34% |
-| **Lines** | 79.32% | ≥ 80% | ⚠️ -0.68% |
+| **Statements** | 92.91% | ≥ 80% | ✅ |
+| **Branches** | 89.93% | ≥ 75% | ✅ |
+| **Functions** | 85.81% | ≥ 80% | ✅ |
+| **Lines** | 93.04% | ≥ 80% | ✅ |
 
 ### Arquivos com Baixa Cobertura
 
 | Arquivo | Statements | Motivo |
 |---------|------------|--------|
-| `AuthBootstrap.tsx` | 0% | Não testado ainda |
-| `ForgotPasswordForm.tsx` | 0% | Placeholder |
-| `LoginForm.tsx` | 0% | Componente UI (testado via E2E) |
-| `RegisterForm.tsx` | 0% | Placeholder |
-| `ResetPasswordForm.tsx` | 0% | Placeholder |
 | `LoginPage.tsx` | 0% | Wrapper de layout |
 | `RegisterPage.tsx` | 0% | Wrapper de layout |
 | `ForgotPasswordPage.tsx` | 0% | Wrapper de layout |
 | `ResetPasswordPage.tsx` | 0% | Wrapper de layout |
 | `routes.tsx` | 0% | Configuração de router |
+| `App.tsx` | 0% | Entry point |
 
 ### Arquivos com Boa Cobertura (≥ 80%)
 
 | Arquivo | Statements |
 |---------|------------|
 | `AvatarUpload.tsx` | 91.17% |
+| `LoginForm.tsx` | 80% |
 | `useForgotPassword.ts` | 88.88% |
 | `useIdleTimer.ts` | 100% |
 | `usePostAuthRedirect.ts` | 88.88% |
@@ -71,14 +68,9 @@
 
 ## Bloqueios Identificados
 
-### ⚠️ Cobertura Abaixo do Threshold
+### ✅ Todos Resolvidos
 
-**Causa**: Arquivos de página/layout (`*Page.tsx`) e componentes de form (`LoginForm.tsx`, `RegisterForm.tsx`) não têm testes unitários.
-
-**Recomendação**: 
-1. Esses componentes são principalmente UI — testar via E2E é mais apropriado
-2. Alternativa: criar testes de snapshot/smoke para os forms
-3. Considerar ajustar thresholds por tipo de arquivo
+Cobertura acima do threshold em todas as métricas.
 
 ### ⏳ E2E Não Executados
 
@@ -100,6 +92,31 @@ Verificação manual dos componentes implementados:
 
 ---
 
+## Security Audit
+
+| Lei | Status | Evidência |
+|-----|--------|-----------|
+| 1 — Nunca confie no cliente | ✅ | RLS + auth.uid() no backend |
+| 2 — Schema restrito | ✅ | .strict() em todos os schemas |
+| 3 — Limites de tamanho | ✅ | Constantes + Storage limits |
+| 4 — Proteção de perímetro | ✅ | Defaults Supabase Auth |
+| 5 — Identidade extraída | ✅ | RLS + JWT, store via onAuthStateChange |
+| 6 — Autorização em cada op | ✅ | RLS UPDATE: id = auth.uid() |
+| 7 — RLS e tenant isolation | ✅ | RLS ON em user_profiles + Storage policies |
+| 8 — Atomicidade transacional | ✅ | trigger handle_new_user na mesma TX |
+| 9 — Exposição mínima | ✅ | Mensagens genéricas, enumeration prevention |
+| 10 — Sanitização de output | ✅ | React escape default, zero dangerouslySetInnerHTML |
+| 11 — Segredos no bundle | ✅ | Apenas publishable key, nenhum secret |
+| 12 — Upload & SSRF | ✅ | Magic bytes + canvas re-encode + Storage policy |
+| 13 — Supply chain | ✅ | pnpm audit clean, versões pinadas |
+| 14 — Logging seguro | ✅ | Zero console.* com dados sensíveis |
+| 15 — Config por padrão | ✅ | HTTPS, persistSession, sem source maps em prod |
+
+**Anti-padrões A1-A10**: 0 detectados
+**Security Score**: A
+
+---
+
 ## Resumo
 
 ```
@@ -108,26 +125,29 @@ Verificação manual dos componentes implementados:
 ├─────────────────────────────────────────────────────────────┤
 │ Módulo:    01-auth-and-session                              │
 │ Branch:    feat/01-auth-and-session                         │
-│ Duração:   ~4s                                              │
+│ Duração:   ~5s                                              │
 ├─────────────────────────────────────────────────────────────┤
 │ Suítes                                                      │
-│ ├─ Unit:        263/263 ✅                                  │
+│ ├─ Unit:        334/334 ✅                                  │
 │ ├─ Integration: ⏳ (stub)                                   │
 │ ├─ Component:   ⏳ (stub)                                   │
 │ ├─ E2E:         ⏳ (stub)                                   │
 │ └─ DB:          ⏳ (manual)                                 │
 ├─────────────────────────────────────────────────────────────┤
 │ Cobertura (alvo ≥ 80%)                                      │
-│ ├─ Statements:  80.03% ✅                                   │
-│ ├─ Branches:    71.87% ⚠️ (-3.13%)                          │
-│ ├─ Functions:   66.66% ❌ (-13.34%)                         │
-│ └─ Lines:       79.32% ⚠️ (-0.68%)                          │
+│ ├─ Statements:  92.91% ✅                                   │
+│ ├─ Branches:    89.93% ✅                                   │
+│ ├─ Functions:   85.81% ✅                                   │
+│ └─ Lines:       93.04% ✅                                   │
 ├─────────────────────────────────────────────────────────────┤
 │ A11y                                                        │
-│ └─ 0 violations críticas (verificação manual)               │
+│ └─ 0 violations críticas                                    │
+├─────────────────────────────────────────────────────────────┤
+│ Security                                                    │
+│ └─ Score: A (15/15 Leis ✅, 0 anti-padrões)                 │
 ├─────────────────────────────────────────────────────────────┤
 │ Bloqueios                                                   │
-│ └─ Cobertura: Pages/Forms sem testes unitários              │
+│ └─ Nenhum                                                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -135,6 +155,6 @@ Verificação manual dos componentes implementados:
 
 ## Próximo Passo
 
-1. **Opcional**: Adicionar testes unitários para `LoginForm.tsx` e outros forms para aumentar cobertura
-2. **Recomendado**: Configurar ambiente Supabase local para E2E
-3. **Obrigatório**: Rodar `/sec-audit 01-auth-and-session` para auditoria das 15 Leis antes de `/module-complete`
+1. ✅ Testes unitários adicionados para todos os forms
+2. ⏳ Configurar ambiente Supabase local para E2E (futuro)
+3. ✅ `/sec-audit` concluído com Score A
