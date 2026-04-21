@@ -5,7 +5,7 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 | # | Módulo | Status | Spec | Início | Fim | Cobertura | Segurança | Notas |
 |---|--------|--------|------|--------|-----|-----------|-----------|-------|
 | 01 | auth-and-session | ✅ Concluído | ✅ Pronto | 2026-04-19 | 2026-04-20 | 92% | A | 14 ACs · 334 testes · merged |
-| 02 | household-onboarding | 🔄 Em Progresso | ✅ Pronto | 2026-04-21 | — | 77% | A | 28 ACs · 530 testes · quality-report gerado |
+| 02 | household-onboarding | ✅ Concluído | ✅ Pronto | 2026-04-21 | 2026-04-21 | 77% | A | 28 ACs · 530 testes · merged |
 | 03 | categories | ⏳ Pendente | Pendente | — | — | —% | — | CRUD + padrões |
 | 04 | fixed-bills | ⏳ Pendente | Pendente | — | — | —% | — | CRUD + histórico |
 | 05 | bill-occurrences | ⏳ Pendente | Pendente | — | — | —% | — | RPC + pg_cron |
@@ -30,8 +30,8 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 
 ## Resumo Executivo
 
-- **Módulo Ativo**: [02-household-onboarding — Pronto para `/module-complete`]
-- **Módulos Completos**: 1/15 (+ 1 em progresso)
+- **Módulo Ativo**: [Nenhum — pronto para `/spec-draft` do próximo módulo]
+- **Módulos Completos**: 2/15
 - **Cobertura Média**: 85%
 - **Vulnerabilidades em Aberto**: 0 CRÍTICA, 0 ALTA
 
@@ -58,37 +58,29 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 
 ---
 
-## Módulo em Progresso
+## Histórico de Módulos
 
-### 02-household-onboarding 🔄
+### 02-household-onboarding ✅
 
-**Período**: 2026-04-21 → (em progresso)
+**Período**: 2026-04-21 (1 dia)
 **Branch**: `feat/02-household-onboarding`
 **Scorecard**: A
-**Quality Report**: [quality-report.md](./modules/02-household-onboarding/quality-report.md)
+**Changelog**: [CHANGELOG.md](./modules/02-household-onboarding/CHANGELOG.md)
 
 **Entregue**:
 - 28 ACs implementados
-- 1 migration (households, household_members, household_member_audit, join_rate_limits)
+- 2 migrations (households + fix_pgcrypto)
 - 6 RPCs (create_household, join_household, regenerate_invite_code, leave_household, remove_member, get_current_household)
-- 49 arquivos (15 onboarding + 34 household)
-- 530 testes unitários
-- 5 E2E specs
+- 14 componentes UI + 12 hooks
+- 530 testes unitários + 5 E2E specs
 
-**Cobertura**: Statements 77.12% | Branches 70.17% | Functions 66.15% | Lines 77.04%
+**Cobertura**: Statements 77% | Branches 70% | Functions 66% | Lines 77%
 
 **Destaques**:
-- Invite code alfanumérico (6 chars, charset 32, 48h validade) via `gen_random_bytes()` (CSPRNG)
-- Audit trail imutável (joined/left/removed) — INSERTs apenas via RPCs SECURITY DEFINER
-- Soft delete para saída/remoção de membros + re-entry preservado
-- Helper `get_user_household_id()` como base de RLS para módulos futuros
-- Setter controlado `setHouseholdId` no `useAuthStore` (preserva invariante Lei 1/9)
-- Rate-limit 5 tentativas/min com GC automático
-
-**Próximo passo**:
-```
-/module-complete 02-household-onboarding
-```
+- Invite code alfanumérico via CSPRNG (pgcrypto)
+- Audit trail imutável (joined/left/removed)
+- Helper `get_user_household_id()` para RLS de módulos futuros
+- Setter controlado `setHouseholdId` no store
 
 ---
 
@@ -97,3 +89,8 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 **03-categories** — Spec Pendente
 
 CRUD de categorias de despesas com padrões pré-definidos.
+
+Para iniciar:
+```
+/spec-draft "CRUD de categorias de despesas com padrões"
+```
