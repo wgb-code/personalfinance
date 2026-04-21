@@ -37,7 +37,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 
 export interface RegisterResult {
   user: User;
-  session: Session;
+  session: Session | null;
 }
 
 export type UseRegisterReturn = UseMutationResult<
@@ -88,7 +88,7 @@ export function useRegister(): UseRegisterReturn {
         throw new Error(mapAuthError(error));
       }
 
-      if (!data.session || !data.user) {
+      if (!data.user) {
         throw new Error(AUTH_MESSAGES.UNEXPECTED_ERROR);
       }
 
@@ -108,12 +108,16 @@ export function useRegister(): UseRegisterReturn {
         }
       }
 
-      useAuthStore.getState().setSession(data.session);
+      if (data.session) {
+        useAuthStore.getState().setSession(data.session);
+      }
 
       return { user: data.user, session: data.session };
     },
-    onSuccess: () => {
-      navigate("/onboarding", { replace: true });
+    onSuccess: (result) => {
+      if (result.session) {
+        navigate("/onboarding", { replace: true });
+      }
     },
   });
 }

@@ -23,7 +23,6 @@ describe("mapAuthError — credenciais inválidas (Lei 9)", () => {
       { message: "Invalid login credentials", status: 400, code: "invalid_credentials" },
     ],
     ["Error('User not found') — não revelar (Lei 9)", new Error("User not found")],
-    ["Error('Email not confirmed') — não revelar (Lei 9)", new Error("Email not confirmed")],
     [
       "Error case-insensitive 'INVALID LOGIN CREDENTIALS'",
       new Error("INVALID LOGIN CREDENTIALS"),
@@ -39,6 +38,15 @@ describe("mapAuthError — credenciais inválidas (Lei 9)", () => {
     // toBe: identidade textual estrita — qualquer ramo diferente quebra aqui.
     expect(userNotFound).toBe(invalidCreds);
     expect(userNotFound).toBe(AUTH_MESSAGES.INVALID_CREDENTIALS);
+  });
+});
+
+describe("mapAuthError — email não confirmado", () => {
+  it.each<[string, unknown]>([
+    ["Error('Email not confirmed')", new Error("Email not confirmed")],
+    ["mensagem case-insensitive", { message: "EMAIL NOT CONFIRMED" }],
+  ])("%s → EMAIL_NOT_CONFIRMED", (_label, input) => {
+    expect(mapAuthError(input)).toBe(AUTH_MESSAGES.EMAIL_NOT_CONFIRMED);
   });
 });
 

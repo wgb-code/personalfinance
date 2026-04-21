@@ -20,10 +20,11 @@
  *   1. Comparar pela MENSAGEM (substring case-insensitive) — o Supabase
  *      muda formatos de erro entre versões; substring é mais resiliente
  *      que `===`.
- *   2. Para credenciais inválidas: COLAPSAR todos os ramos (email
- *      inexistente, senha errada, email não confirmado) numa única
- *      mensagem. Diferenciar permitiria enumeração de contas.
- *   3. Defensivo contra `unknown`: a borda da função aceita qualquer
+ *   2. Distinguir "email não confirmado" para orientar o usuário que
+ *      acabou de se cadastrar, sem expor detalhes técnicos.
+ *   3. Para credenciais inválidas, colapsar os ramos (email inexistente
+ *      e senha errada) numa única mensagem para reduzir enumeração.
+ *   4. Defensivo contra `unknown`: a borda da função aceita qualquer
  *      coisa — `null`, `undefined`, primitivos, Error sem `message`.
  *      Tudo cai em `UNEXPECTED_ERROR`.
  */
@@ -95,20 +96,20 @@ function isNetworkError(shape: ErrorShape): boolean {
  *
  * Garantias:
  *   - Sempre retorna uma string não vazia (nunca `undefined`).
- *   - Lei 9: credenciais inválidas, usuário inexistente e email não
- *     confirmado retornam EXATAMENTE a mesma string
- *     (`AUTH_MESSAGES.INVALID_CREDENTIALS`).
+ *   - Lei 9: credenciais inválidas e usuário inexistente retornam
+ *     EXATAMENTE a mesma string (`AUTH_MESSAGES.INVALID_CREDENTIALS`).
  *   - Lei 14: NÃO loga.
  *
  * Ordem de avaliação importa:
  *   1. Rate limit (status 429 OU substring) — checar antes de
  *      "credenciais" porque o Supabase às vezes devolve 429 com message
  *      vazia, e queremos a UX correta de "espere uns minutos".
- *   2. Credenciais inválidas (cobre login + email não confirmado).
- *   3. Email já cadastrado (signup).
- *   4. Senha fraca (reset).
- *   5. Rede (TypeError ou substrings clássicas).
- *   6. Fallback `UNEXPECTED_ERROR`.
+ *   2. Email não confirmado (login).
+ *   3. Credenciais inválidas.
+ *   4. Email já cadastrado (signup).
+ *   5. Senha fraca (reset).
+ *   6. Rede (TypeError ou substrings clássicas).
+ *   7. Fallback `UNEXPECTED_ERROR`.
  */
 /**
  * Verifica se um erro é de rate limit (AC-07).
@@ -138,12 +139,15 @@ export function mapAuthError(error: unknown): string {
     return AUTH_MESSAGES.RATE_LIMITED;
   }
 
+  if (msg.includes("email not confirmed")) {
+    return AUTH_MESSAGES.EMAIL_NOT_CONFIRMED;
+  }
+
   if (
     shape.code === "invalid_credentials" ||
     msg.includes("invalid login credentials") ||
     msg.includes("invalid email or password") ||
-    msg.includes("user not found") ||
-    msg.includes("email not confirmed")
+    msg.includes("user not found")
   ) {
     return AUTH_MESSAGES.INVALID_CREDENTIALS;
   }

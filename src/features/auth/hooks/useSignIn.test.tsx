@@ -147,6 +147,25 @@ describe("useSignIn — credenciais inválidas (AC-06 + Lei 9)", () => {
     expect(onError).toHaveBeenCalledWith(AUTH_MESSAGES.INVALID_CREDENTIALS);
   });
 
+  test("400 com msg='Email not confirmed' → mensagem EMAIL_NOT_CONFIRMED", async () => {
+    server.use(
+      http.post(TOKEN_ENDPOINT, () =>
+        HttpResponse.json({ msg: "Email not confirmed" }, { status: 400 }),
+      ),
+    );
+
+    const onError = vi.fn();
+    const { result } = renderWithClient(() => useSignIn({ onError }));
+
+    result.current.mutate({ email: "joao@x.com", password: "Segura123" });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error?.message).toBe(AUTH_MESSAGES.EMAIL_NOT_CONFIRMED);
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(onError).toHaveBeenCalledWith(AUTH_MESSAGES.EMAIL_NOT_CONFIRMED);
+  });
+
   test("invariância: 'User not found' e 'Invalid login credentials' produzem mensagem IDÊNTICA", async () => {
     server.use(
       http.post(TOKEN_ENDPOINT, () =>

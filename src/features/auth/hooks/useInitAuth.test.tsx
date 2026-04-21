@@ -89,8 +89,10 @@ describe("useInitAuth — bootstrap do app (AC-08)", () => {
 
     renderHook(() => useInitAuth());
 
-    expect(mockGetSession).toHaveBeenCalledTimes(1);
-    expect(mockOnAuthStateChange).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockGetSession).toHaveBeenCalledTimes(1);
+      expect(mockOnAuthStateChange).toHaveBeenCalledTimes(1);
+    });
   });
 
   test("deve atualizar useAuthStore.user quando sessão existe", async () => {
@@ -194,5 +196,20 @@ describe("useInitAuth — bootstrap do app (AC-08)", () => {
     await waitFor(() => {
       expect(result.current.isInitializing).toBe(false);
     });
+  });
+
+  test("deve finalizar bootstrap mesmo quando getSession falha", async () => {
+    mockGetSession.mockRejectedValue(new Error("supabase indisponível"));
+
+    renderHook(() => useInitAuth());
+
+    await waitFor(() => {
+      expect(useAuthStore.getState().isInitializing).toBe(false);
+    });
+
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().session).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
+    expect(mockOnAuthStateChange).not.toHaveBeenCalled();
   });
 });

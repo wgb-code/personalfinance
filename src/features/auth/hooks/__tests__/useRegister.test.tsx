@@ -193,6 +193,24 @@ describe("useRegister — AC-01 (Cadastro com dados válidos)", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/onboarding", { replace: true });
   });
 
+  test("não deve navegar quando cadastro exige confirmação de email", async () => {
+    mockSignUp.mockResolvedValue({
+      data: { user: mockUser, session: null },
+      error: null,
+    });
+
+    const { result } = renderWithProviders(() => useRegister());
+
+    await act(async () => {
+      result.current.mutate(validInput);
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.error).toBeNull();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
   test("deve retornar isPending durante mutation", async () => {
     mockSignUp.mockImplementation(
       () =>
@@ -252,7 +270,7 @@ describe("useRegister — AC-01 (Cadastro com dados válidos)", () => {
 });
 
 describe("useRegister — sincronização de estado", () => {
-  test("deve popular useAuthStore.session após sucesso", async () => {
+  test("deve popular useAuthStore.session após sucesso com sessão", async () => {
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
 
     const { result } = renderWithProviders(() => useRegister());
@@ -266,6 +284,25 @@ describe("useRegister — sincronização de estado", () => {
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
     expect(useAuthStore.getState().session).toBe(mockSession);
     expect(useAuthStore.getState().user).toBe(mockUser);
+  });
+
+  test("não deve autenticar a store quando signup retorna user sem sessão", async () => {
+    mockSignUp.mockResolvedValue({
+      data: { user: mockUser, session: null },
+      error: null,
+    });
+
+    const { result } = renderWithProviders(() => useRegister());
+
+    await act(async () => {
+      result.current.mutate(validInput);
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().session).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
   });
 });
 

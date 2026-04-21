@@ -95,6 +95,27 @@ describe("RegisterForm — AC-01, AC-02", () => {
 
       expect(screen.getByRole("link", { name: AUTH_MESSAGES.REGISTER_GO_TO_LOGIN })).toBeInTheDocument();
     });
+
+    test("deve exibir CTA de confirmação quando cadastro foi concluído sem sessão", () => {
+      (useRegister as Mock).mockReturnValue({
+        mutate: mockMutate,
+        isPending: false,
+        isSuccess: true,
+        data: { user: { id: "user-1" }, session: null },
+      });
+
+      renderRegisterForm();
+
+      expect(
+        screen.getByRole("heading", { name: AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_TITLE })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_MESSAGE)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_CTA })
+      ).toBeInTheDocument();
+    });
   });
 
   describe("Acessibilidade", () => {

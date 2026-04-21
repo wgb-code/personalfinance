@@ -57,14 +57,19 @@ export const AUTH_MESSAGES = {
    * Mensagem ÚNICA e neutra para qualquer falha de credencial no login
    * (AC-06 + Lei 9 — Exposição Mínima). Usada indistintamente para:
    *   - email inexistente,
-   *   - senha incorreta,
-   *   - email não confirmado.
+   *   - senha incorreta.
    *
    * Diferenciar essas situações no UI permitiria enumeração de contas
    * (atacante descobre quais emails têm cadastro). NUNCA mude esse texto
    * sem revisar `auth-errors.ts` e seus testes de invariância.
    */
   INVALID_CREDENTIALS: "Email ou senha incorretos",
+
+  /**
+   * Login com credenciais corretas, mas conta ainda pendente de
+   * confirmação de email no Supabase Auth.
+   */
+  EMAIL_NOT_CONFIRMED: "Confirme seu email antes de entrar.",
 
   /**
    * AC-07 — Rate limit do Supabase Auth (HTTP 429 ou
@@ -142,6 +147,11 @@ export const AUTH_MESSAGES = {
   REGISTER_AVATAR_LABEL: "Foto de perfil",
   REGISTER_AVATAR_HINT: "Opcional — JPEG, PNG ou WebP, até 2MB",
   REGISTER_GO_TO_LOGIN: "Já tenho conta",
+  REGISTER_EMAIL_CONFIRMATION_TITLE: "Cadastro concluído",
+  REGISTER_EMAIL_CONFIRMATION_HINT: "Valide seu email para ativar a conta.",
+  REGISTER_EMAIL_CONFIRMATION_MESSAGE:
+    "Enviamos um link de confirmação para seu email. Confirme para poder entrar.",
+  REGISTER_EMAIL_CONFIRMATION_CTA: "Ir para login",
   REGISTER_PAGE_TITLE: "Criar conta — Organizador Financeiro",
 
   /**

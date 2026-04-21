@@ -15,7 +15,7 @@
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleAlert, Loader2 } from "lucide-react";
+import { CircleAlert, CircleCheck, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { z } from "zod";
 
@@ -44,7 +44,8 @@ type RegisterFormValues = z.input<typeof registerSchema>;
 export function RegisterForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { mutate, isPending } = useRegister();
+  const { mutate, isPending, isSuccess, data } = useRegister();
+  const requiresEmailConfirmation = isSuccess && data?.session === null;
 
   const form = useForm<RegisterFormValues, unknown, RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -66,6 +67,32 @@ export function RegisterForm() {
       },
     });
   });
+
+  if (requiresEmailConfirmation) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>{AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_TITLE}</CardTitle>
+          <CardDescription>
+            {AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_HINT}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert role="status">
+            <CircleCheck aria-hidden="true" />
+            <AlertDescription>
+              {AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_MESSAGE}
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+        <CardFooter>
+          <Button className="w-full" asChild>
+            <Link to="/login">{AUTH_MESSAGES.REGISTER_EMAIL_CONFIRMATION_CTA}</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-sm">

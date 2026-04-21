@@ -14,6 +14,7 @@
  *   - Lei 14: logout em `onSettled` garante limpeza mesmo em falha
  */
 import { useState, type ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 
 import { SessionExpiredModal } from "@/features/auth/components/SessionExpiredModal";
 import { useIdleTimer } from "@/features/auth/hooks/useIdleTimer";
@@ -22,7 +23,7 @@ import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useAuthStore, selectIsAuthenticated } from "@/stores/useAuthStore";
 
 interface AuthBootstrapProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export function AuthBootstrap({ children }: AuthBootstrapProps) {
@@ -58,7 +59,7 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
 
   return (
     <>
-      {children}
+      {children ?? <Outlet />}
       <SessionExpiredModal
         isOpen={showSessionExpired}
         onClose={handleSessionExpiredClose}

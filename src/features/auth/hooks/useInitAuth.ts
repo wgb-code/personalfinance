@@ -27,25 +27,40 @@ export function useInitAuth(): UseInitAuthReturn {
   const reset = useAuthStore((state) => state.reset);
 
   useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
     const initializeAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
+      try {
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+      } catch {
+        /**
+         * Evita tela travada no boot quando o cliente Supabase não consegue
+         * inicializar (ex.: env ausente em ambiente local).
+         */
+        reset();
+        return;
+      }
 
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "SIGNED_OUT") {
           reset();
         } else {
           setSession(session);
         }
-      }
-    );
+      });
+
+      unsubscribe = () => {
+        subscription.unsubscribe();
+      };
+    };
+
+    void initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, [setSession, reset]);
 

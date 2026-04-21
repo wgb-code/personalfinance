@@ -23,6 +23,7 @@
  */
 import { createBrowserRouter } from "react-router-dom";
 
+import { AuthBootstrap } from "@/features/auth/components/AuthBootstrap";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
@@ -84,18 +85,23 @@ function NotFoundPlaceholder() {
 }
 
 export const appRouter = createBrowserRouter([
-  { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> },
-  { path: "/forgot-password", element: <ForgotPasswordPage /> },
-  { path: "/reset-password", element: <ResetPasswordPage /> },
   {
-    element: <ProtectedRoute />,
+    element: <AuthBootstrap />,
     children: [
-      { path: "/", element: <HomePlaceholder /> },
-      { path: "/dashboard", element: <DashboardPlaceholder /> },
-      { path: "/onboarding", element: <OnboardingPlaceholder /> },
-      { path: "/bills", element: <BillsListPlaceholder /> },
-      { path: "/bills/:id", element: <BillDetailPlaceholder /> },
+      { path: "/login", element: <LoginPage /> },
+      { path: "/register", element: <RegisterPage /> },
+      { path: "/forgot-password", element: <ForgotPasswordPage /> },
+      { path: "/reset-password", element: <ResetPasswordPage /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/", element: <HomePlaceholder /> },
+          { path: "/dashboard", element: <DashboardPlaceholder /> },
+          { path: "/onboarding", element: <OnboardingPlaceholder /> },
+          { path: "/bills", element: <BillsListPlaceholder /> },
+          { path: "/bills/:id", element: <BillDetailPlaceholder /> },
+        ],
+      },
     ],
   },
   { path: "*", element: <NotFoundPlaceholder /> },
