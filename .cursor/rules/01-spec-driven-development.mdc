@@ -1,0 +1,250 @@
+# Spec-Driven Development (SDD) Workflow
+
+## Overview
+
+This project strictly follows **Spec-Driven Development (TDD)** principles: every feature module begins with a detailed specification (spec.md, tasks.md, security.md) before any implementation code is written. The spec serves as the contract between design, security, and implementation.
+
+---
+
+## SDD Workflow for New Modules
+
+### Recommended Path (Automated Spec Generation)
+
+For most new modules:
+
+```
+1. Run /spec-draft "brief theme"
+   ↓
+   Agent proposes module slug, asks critical questions
+   ↓
+2. Respond to questions
+   ↓
+3. Review consolidated plan
+   ↓
+4. Confirm (or adjust, which loops back to Q&A)
+   ↓
+5. spec-architect generates:
+   - specs/modules/NN-slug/spec.md (complete)
+   - specs/modules/NN-slug/tasks.md (TDD checklist)
+   - specs/modules/NN-slug/security.md (15 Laws)
+   ↓
+6. Run /spec-review NN-slug for final validation
+   ↓
+7. Run /module-start NN-slug to begin implementation
+```
+
+**Advantages**: Spec is rich with context; all 15 security laws pre-mapped; zero manual entry of boilerplate.
+
+### Manual Path (Low-Level Scaffold)
+
+Only when you have **all** details locked in and want direct control:
+
+```
+1. Run /spec-new <number> <slug>
+   ↓
+   Creates blank: specs/modules/NN-slug/{spec.md, tasks.md, security.md}
+   ↓
+2. Manually populate all three files
+   ↓
+3. Run /spec-review NN-slug
+   ↓
+4. Run /module-start NN-slug
+```
+
+**When to use**: Rare. Use /spec-draft first unless you have a very specific reason.
+
+---
+
+## Module Spec Structure
+
+Every module spec must include:
+
+**spec.md**:
+- Objetivo (one-liner)
+- Personas & Casos de Uso
+- Regras de Negócio
+- Entradas/Saídas (with constraints)
+- Critérios de Aceite (Gherkin: Given/When/Then)
+- Fora de Escopo
+- Dependências de Módulos
+- Sugestão de Estrutura de Arquivos
+- Métricas de Sucesso
+
+**tasks.md**:
+- One task per Gherkin criterion
+- Four checkboxes per task: RED / GREEN / REFACTOR / SECURITY
+- Summary table with status tracking
+- Total coverage % and Security Scorecard
+
+**security.md**:
+- 15 Laws of Secure Architecture (all applicable ones mapped)
+- Per-law: "O que testar", "Como testar", "Evidência"
+- Summary compliance scorecard
+- Mark non-applicable laws with brief rationale
+
+---
+
+## Fixed Module Order
+
+The 15 modules must be implemented in this order (dependencies require it):
+
+1. **01-auth-and-session** — Supabase Auth + JWT + session state
+2. **02-household-multi-tenancy** — Household creation, member invite, RLS tenant isolation
+3. **03-categories** — Expense/income categories (personal + shared in household)
+4. **04-fixed-bills** — Recurring monthly bills
+5. **05-expenses** — One-off expenses + attachments
+6. **06-income** — Salary and variable income
+7. **07-goals-and-events** — Savings goals, life events (car, vacation)
+8. **08-dashboard** — Overview card, quick stats, trends
+9. **09-widgets-and-customization** — Dashboard widget selection and reorder
+10. **10-filters-and-reports** — Date range filters, category drill-down, P&L export
+11. **11-notifications-and-alerts** — Bill due alerts, goal milestone, anomaly flags
+12. **12-configurations** — App settings (theme, language, notifications, privacy)
+13. **13-mobile-responsive** — Optimize for phone (buttons, layouts, touch)
+14. **14-export-and-ical** — PDF export, iCal sync for calendars
+15. **15-security-and-compliance** — Final security audit, GDPR compliance, secrets rotation
+
+**Do not skip or reorder** without explicit risk assessment.
+
+---
+
+## Acceptance Criteria Format
+
+All criteria must be in **Gherkin** (Given/When/Then):
+
+```gherkin
+Scenario: User creates a fixed bill with valid data
+  Given I am logged in as a household owner
+  And I am on the Fixed Bills create page
+  When I fill "name" with "Internet"
+  And I fill "value" with "99.90"
+  And I fill "due_day" with "10"
+  And I select category "Utilities"
+  And I click "Create Bill"
+  Then the page shows "Bill created successfully"
+  And the bill appears in my bill list
+  And a PostgreSQL trigger has logged the value in bill_value_history
+```
+
+**Why Gherkin?**:
+- Clear, executable specification
+- Non-technical stakeholders can read it
+- Maps directly to E2E test code
+- Traceability to business rules
+
+---
+
+## Security Mapping (15 Laws)
+
+Every spec.md or security.md must address:
+
+1. **Client never trusted** (IDOR/BOLA): Validate all user input at backend; IDs from JWT
+2. **Schema whitelist** (Mass Assignment): Explicit Zod/validation schemas; reject unknown fields
+3. **Size & rate limits** (DoS): max string lengths, numeric constraints, request rate limits
+4. **Perimeter protection**: CORS, CSRF, rate-limit middleware
+5. **Identity extracted** (not received): user_id, household_id from auth context, never from body
+6. **Authorization on each op**: Every read/write checks roles (owner, member, guest)
+7. **RLS enforced** (Row-Level Security): Every table has RLS enabled; policies use `get_user_household_id()`
+8. **Atomic transactions**: Multi-step operations wrapped in transactions; triggers use same tx
+9. **Minimal exposure** (output sanitization): Return only needed fields; never return internal IDs or temp data
+10. **HTML escaping** (XSS): React default escaping; no `dangerouslySetInnerHTML`; Zod coercion
+11. **Secrets not in code**: No API keys in .env.sample or bundle; .env.local only
+12. **Upload & SSRF safety**: Magic byte validation, signed URLs, storage isolation per household
+13. **Supply chain security**: pnpm audit clean; pin versions; no abandoned deps
+14. **Secure logging**: Log user actions + errors; no passwords/tokens in logs
+15. **Config by default**: HTTPS enforced; cookies HttpOnly + Secure + SameSite=Strict; strict CSP
+
+**In spec.md**, every law that applies must have a brief explanation of how it's enforced in that module.
+
+---
+
+## Development Workflow (After Spec is Ready)
+
+Once spec is approved (`/spec-review` passes):
+
+```
+1. /module-start NN-slug
+   ↓ Creates feature branch + scaffolds src/ folder structure
+
+1.5 (OPTIONAL — automated execution) /module-run NN-slug
+   ↓ Invokes `module-orchestrator` agent which automatically dispatches
+     supabase-engineer → logic-engineer → layout-architect → qa-validator
+     for every pending AC in tasks.md, with auto-retry 1x per technical failure.
+   ↓ Updates tasks.md + _progress.md + orchestration-log.md after EVERY phase
+     (so interruption at any point preserves real state on disk).
+   ↓ Triggers /module-test + /sec-audit at the end and stops before /module-complete.
+   ↓ Use when spec/tasks/security are mature and you want to reduce manual hand-off.
+   ↓ Use `--dry-run` to preview routing, `--from AC-XX` to resume after halt,
+     `--no-qa` to stop before the QA gate.
+   ↓ See .cursor/agents/module-orchestrator.md and .cursor/commands/module-run.md.
+
+2. TDD Cycle (per acceptance criterion):
+   a. RED: Write failing test (unit, integration, E2E)
+   b. GREEN: Implement minimum code to pass
+   c. REFACTOR: Clean, extract, integrate with state/components
+   d. SECURITY: Run security audit; check against 15 Laws
+   
+   Update tasks.md checkboxes as you complete each phase
+   (skip this step if you used /module-run in 1.5 — orchestrator handles it)
+
+3. /module-test NN-slug
+   ↓ Run Vitest (browser-mode) + Playwright E2E + axe accessibility
+   (skip if /module-run already triggered the QA gate)
+
+4. /sec-audit NN-slug
+   ↓ Verify all 15 Laws; check RLS policies; validate Zod schemas; check logs
+   ↓ Mark security.md as "Verificado"
+   (skip if /module-run already triggered the QA gate)
+
+5. /module-complete NN-slug
+   ↓ Merge to main; update _progress.md to "Pronto"
+   (ALWAYS human gate — never invoked by /module-run)
+```
+
+---
+
+## Spec Review Gates (`/spec-review`)
+
+Before marking a spec "ready for implementation", verify:
+
+- [ ] All Gherkin criteria are executable (Given/When/Then)
+- [ ] Acceptance criteria count is realistic for scope (8–15 typical)
+- [ ] All upstream dependencies listed are "Pronto" in _progress.md
+- [ ] Security.md maps all 15 Laws; non-applicable ones have rationale
+- [ ] tasks.md has one task per criterion; RED/GREEN/REFACTOR/SECURITY phases are clear
+- [ ] File structure proposal is realistic (no vague "TBD")
+- [ ] Success metrics are measurable (coverage %, performance targets, security scorecard)
+
+If any gate fails, request adjustments via `/spec-draft` questions or manual edit.
+
+---
+
+## Constitution & Immutable Principles
+
+This SDD process is governed by `specs/_constitution.md`, which defines:
+
+1. SDD always comes first
+2. TDD cycles strictly on real DOM (Vitest browser-mode + Playwright)
+3. One module at a time (no parallel features)
+4. Multi-tenancy baked in from day 1 (RLS, household_id)
+5. Security is zero-trust (never assume client is safe)
+6. Tests execute in real browser (no mocks of DOM)
+7. Fixed module order (no skipping or reordering)
+8. Specs are living documentation (update as you learn)
+9. Tests are the spec's executable contract
+10. Strict TypeScript (no `any`, exhaustive checks)
+
+**Breaking SDD = breaking the entire build process.** All agents and commands enforce this strictly.
+
+---
+
+## References
+
+- [specs/_constitution.md](../../specs/_constitution.md) — 10 immutable principles
+- [specs/_tdd-flow.md](../../specs/_tdd-flow.md) — Red → Green → Refactor → Security cycle
+- [specs/_module-template/](../../specs/_module-template/) — templates for spec.md, tasks.md, security.md
+- [docs/REQUIREMENTS.md](../../docs/REQUIREMENTS.md) — functional scope (reference for /spec-draft)
+- [docs/STACK.md](../../docs/STACK.md) — tech decisions (reference for /spec-draft)
+- [docs/SCHEMA.md](../../docs/SCHEMA.md) — database schema (reference for /spec-draft)
+- [docs/SECURITY.md](../../docs/SECURITY.md) — 15 Laws + anti-patterns (reference for security.md)
+

@@ -11,6 +11,18 @@ node_modules
 dist
 dist-ssr
 
+# Env (NUNCA commitar — Lei 11)
+.env
+.env.local
+.env.*.local
+.env.example
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+.qa/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

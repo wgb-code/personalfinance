@@ -73,7 +73,7 @@ O modo ativo é gerenciado no estado global do frontend (Zustand) e influencia a
 | **React Query (TanStack Query)** | Fetching, cache e sincronização de dados com o Supabase |
 | **Recharts** | Gráficos e visualizações de dados |
 | **@react-pdf/renderer** | Geração de relatórios em PDF **client-side** (sem servidor) |
-| **React Router v6** | Roteamento SPA |
+| **React Router v7** | Roteamento SPA |
 
 ### Decisões de Frontend
 
@@ -265,10 +265,10 @@ src/
 
 ```env
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon-key>
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<...>
 ```
 
-> A `anon key` é segura no frontend pois o acesso real é controlado inteiramente pelo RLS no banco.
+> A `publishable key` (formato `sb_publishable_...`) é segura no frontend pois o acesso real é controlado inteiramente pelo RLS no banco. É a sucessora moderna da legacy `anon key` (JWT) — recomendada para apps novos por permitir rotação independente.
 
 ---
 
