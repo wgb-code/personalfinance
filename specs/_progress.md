@@ -4,7 +4,7 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 
 | # | Módulo | Status | Spec | Início | Fim | Cobertura | Segurança | Notas |
 |---|--------|--------|------|--------|-----|-----------|-----------|-------|
-| 01 | auth-and-session | 🔄 Em Progresso | ✅ Pronto | 2026-04-19 | — | —% | — | **MÓDULO ATIVO** · 14 ACs · branch `feat/01-auth-and-session` |
+| 01 | auth-and-session | ✅ Concluído | ✅ Pronto | 2026-04-19 | 2026-04-20 | 92% | A | 14 ACs · 334 testes · merged |
 | 02 | household-onboarding | ⏳ Pendente | Pendente | — | — | —% | — | Invite code + Edge Function |
 | 03 | categories | ⏳ Pendente | Pendente | — | — | —% | — | CRUD + padrões |
 | 04 | fixed-bills | ⏳ Pendente | Pendente | — | — | —% | — | CRUD + histórico |
@@ -30,35 +30,41 @@ Rastreamento do status dos 15 módulos. Atualizar ao fim de cada `/module-finish
 
 ## Resumo Executivo
 
-- **Módulo Ativo**: 🔄 **01-auth-and-session** (iniciado em 2026-04-19, branch `feat/01-auth-and-session`)
-- **Módulos Completos**: 0/15
-- **Cobertura Média**: —%
+- **Módulo Ativo**: [Nenhum — pronto para `/spec-draft` do próximo módulo]
+- **Módulos Completos**: 1/15
+- **Cobertura Média**: 92%
 - **Vulnerabilidades em Aberto**: 0 CRÍTICA, 0 ALTA
 
-> ⛔ **Bloqueio ativo**: Enquanto `01-auth-and-session` estiver em progresso, **NENHUM outro módulo pode ser iniciado** (princípio "One Module at a Time" — `_constitution.md`). Para liberar, finalize via `/module-complete 01-auth-and-session`.
+---
 
-## Trilha do Módulo Ativo (01-auth-and-session)
+## Histórico de Módulos
 
-> **Automação opcional**: rodar `/module-run 01-auth-and-session` (após Spec `✅ Pronto`) para que o `module-orchestrator` percorra a trilha abaixo automaticamente, despachando o subagent correto por AC e mantendo este arquivo + `tasks.md` + `orchestration-log.md` atualizados em tempo real após cada fase. Para detalhes ver [`.cursor/commands/module-run.md`](../.cursor/commands/module-run.md).
+### 01-auth-and-session ✅
 
-**Ordem recomendada de execução** (de `tasks.md`):
+**Período**: 2026-04-19 → 2026-04-20 (2 dias)
+**Branch**: `feat/01-auth-and-session`
+**Scorecard**: A
 
-| Ordem | AC | Tarefa | Subagent | Pré-requisito |
-|-------|----|--------|----------|---------------|
-| 1 | AC-03 | Migration + trigger `handle_new_user` + RLS user_profiles + bucket avatars | `supabase-engineer` | Cliente Supabase configurado |
-| 2 | AC-01 | Form de cadastro + signUp + upload avatar | `logic-engineer` + `layout-architect` | Migration aplicada |
-| 3 | AC-04 | Pós-cadastro redireciona /onboarding | `logic-engineer` | useAuthStore criado |
-| 4 | AC-13 | ProtectedRoute + safe-redirect | `logic-engineer` | Router configurado |
-| 5 | AC-05 | Login com credenciais válidas | `logic-engineer` | useAuthStore + ProtectedRoute |
-| 6 | AC-08 | Sessão persiste após reload | `logic-engineer` | useInitAuth |
-| 7 | AC-06 | Login inválido (mensagem genérica) | `logic-engineer` | auth-errors.ts |
-| 8 | AC-10 | Logout manual | `logic-engineer` | useAuthStore |
-| 9 | AC-09 | Auto-logout 4h inatividade | `logic-engineer` | SessionExpiredModal |
-| 10 | AC-11 | Reset (mensagem genérica) | `logic-engineer` | auth-errors.ts |
-| 11 | AC-12 | Reset via link do email | `logic-engineer` | Página /reset-password |
-| 12 | AC-14 | Upload avatar (validação magic bytes) | `logic-engineer` + `supabase-engineer` | Bucket configurado |
-| 13 | AC-02 | Validações Zod completas | `logic-engineer` | Schemas criados |
-| 14 | AC-07 | Login rate-limit | `logic-engineer` | Tratamento de erro 429 |
+**Entregue**:
+- 14 ACs implementados
+- 9 componentes UI (LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm, AvatarUpload, ProtectedRoute, RateLimitCountdown, SessionExpiredModal, AuthBootstrap)
+- 9 hooks (useSignIn, useRegister, useLogout, useForgotPassword, useResetPassword, useIdleTimer, useInitAuth, usePostAuthRedirect, useAuthStore)
+- 1 migration (user_profiles + avatars bucket)
+- 334 testes unitários
 
-**Gate final**: `/sec-audit 01-auth-and-session` → Scorecard ≥ B → `qa-validator` aprova → `/module-complete 01-auth-and-session`
+**Cobertura**: Statements 92.91% | Branches 89.93% | Functions 85.81% | Lines 93.04%
 
+**Changelog**: [specs/modules/01-auth-and-session/CHANGELOG.md](./modules/01-auth-and-session/CHANGELOG.md)
+
+---
+
+## Próximo Módulo Sugerido
+
+**02-household-onboarding** — Onboarding de household + invite code
+
+Para iniciar:
+```
+/spec-draft "Onboarding de household + invite code"
+```
+
+Isso vai gerar `specs/modules/02-household-onboarding/spec.md` e iniciar o ciclo TDD.
