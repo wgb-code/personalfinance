@@ -1,11 +1,19 @@
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+vi.mock("@/features/household/hooks/useCurrentHousehold", () => ({
+  useCurrentHousehold: vi.fn(() => ({
+    isLoading: false,
+  })),
+}));
+
+import { useCurrentHousehold } from "@/features/household/hooks/useCurrentHousehold";
 
 /**
  * Integração jsdom + MemoryRouter cobrindo AC-13.
@@ -32,6 +40,10 @@ function DashboardScreen() {
 
 function BillsDetailScreen() {
   return <h1>Detalhes da conta</h1>;
+}
+
+function OnboardingScreen() {
+  return <h1>Onboarding</h1>;
 }
 
 function makeSessionStub(): Session {
@@ -68,8 +80,28 @@ function renderAt(initialUrl: string, children: React.ReactNode) {
             </ProtectedRoute>
           }
         />
+        <Route element={<ProtectedRoute requiresHousehold={false} />}>
+          <Route path="/onboarding" element={<OnboardingScreen />} />
+        </Route>
       </Routes>
       {children}
+    </MemoryRouter>,
+  );
+}
+
+function renderWithHouseholdRoutes(initialUrl: string) {
+  return render(
+    <MemoryRouter initialEntries={[initialUrl]}>
+      <Routes>
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/onboarding" element={<OnboardingScreen />} />
+        <Route element={<ProtectedRoute requiresHousehold />}>
+          <Route path="/dashboard" element={<DashboardScreen />} />
+        </Route>
+        <Route element={<ProtectedRoute requiresHousehold={false} />}>
+          <Route path="/onboarding-protected" element={<OnboardingScreen />} />
+        </Route>
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -118,6 +150,7 @@ describe("<ProtectedRoute /> — inicializando", () => {
 describe("<ProtectedRoute /> — com sessão", () => {
   test("renderiza Outlet quando autenticado (uso como route element)", () => {
     useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.getState().setHouseholdId("test-household-uuid");
     renderAt("/dashboard", null);
 
     expect(
@@ -128,8 +161,106 @@ describe("<ProtectedRoute /> — com sessão", () => {
 
   test("renderiza children quando autenticado (uso como wrapper)", () => {
     useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.getState().setHouseholdId("test-household-uuid");
     renderAt("/protegido-children", null);
 
     expect(screen.getByText(/conteúdo via children/i)).toBeInTheDocument();
+  });
+});
+
+describe("<ProtectedRoute /> — com household (AC-14, AC-14.1)", () => {
+  beforeEach(() => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: false,
+    } as ReturnType<typeof useCurrentHousehold>);
+  });
+
+  test("AC-14.1: deve renderizar loading durante verificação de household", () => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: true,
+    } as ReturnType<typeof useCurrentHousehold>);
+
+    useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.setState({ householdId: null });
+
+    renderWithHouseholdRoutes("/dashboard");
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("heading", { name: /dashboard/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /onboarding/i })).not.toBeInTheDocument();
+  });
+
+  test("AC-14: deve redirecionar para /onboarding se não tem household", () => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: false,
+    } as ReturnType<typeof useCurrentHousehold>);
+
+    useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.setState({ householdId: null });
+
+    renderWithHouseholdRoutes("/dashboard");
+
+    expect(screen.getByRole("heading", { name: /onboarding/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /dashboard/i })).not.toBeInTheDocument();
+  });
+
+  test("AC-14: deve renderizar dashboard se tem household", () => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: false,
+    } as ReturnType<typeof useCurrentHousehold>);
+
+    useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.getState().setHouseholdId("test-household-uuid");
+
+    renderWithHouseholdRoutes("/dashboard");
+
+    expect(screen.getByRole("heading", { name: /dashboard/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /onboarding/i })).not.toBeInTheDocument();
+  });
+
+  test("RN-30: deve redirecionar para /dashboard se tem household e acessa onboarding", () => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: false,
+    } as ReturnType<typeof useCurrentHousehold>);
+
+    useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.getState().setHouseholdId("test-household-uuid");
+
+    render(
+      <MemoryRouter initialEntries={["/onboarding"]}>
+        <Routes>
+          <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route element={<ProtectedRoute requiresHousehold={false} />}>
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: /dashboard/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /onboarding/i })).not.toBeInTheDocument();
+  });
+
+  test("deve renderizar onboarding quando requiresHousehold=false e não tem household", () => {
+    vi.mocked(useCurrentHousehold).mockReturnValue({
+      isLoading: false,
+    } as ReturnType<typeof useCurrentHousehold>);
+
+    useAuthStore.getState().setSession(makeSessionStub());
+    useAuthStore.setState({ householdId: null });
+
+    render(
+      <MemoryRouter initialEntries={["/onboarding"]}>
+        <Routes>
+          <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route element={<ProtectedRoute requiresHousehold={false} />}>
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: /onboarding/i })).toBeInTheDocument();
   });
 });

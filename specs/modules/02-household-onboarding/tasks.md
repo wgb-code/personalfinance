@@ -636,45 +636,45 @@ A ordem abaixo respeita dependências técnicas:
 
 | AC | Critério | RED | GREEN | REFACTOR | SECURITY | Status |
 |----|----------|-----|-------|----------|----------|--------|
-| 01 | Criar household válido | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 02 | Rejeitar nome inválido | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 03 | Gerar invite code | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 04 | Regenerar código | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 05 | Código expira 48h | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 06 | Join código válido | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 07 | Rejeitar código inválido | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 08 | Rejeitar se já em household (UI) | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 08.1 | Rejeitar se já em household (API) | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 09 | Pular onboarding | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 10 | Listar membros | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 11 | Member sai | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 12 | Owner remove | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 13 | Popular store via setter (inclui bootstrap via useCurrentHousehold — task 13.1) | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 14 | Redirect correto | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 14.1 | Sem flash durante loading | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 15 | Audit: join | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 16 | Audit: leave | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 17 | Audit: remove | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 18 | Owner vê audit | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 19 | Member não vê audit | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 20 | Re-entry com novo código | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 21 | Histórico preservado no re-entry | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 22 | Join concorrente no mesmo código | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 23 | Rate limit após 5 tentativas | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 24 | Reset de rate limit após 1 min | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 25 | Owner não deleta conta com membros | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 26 | Owner solo deleta conta com cascade | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 27 | Clipboard: copiar código | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 27.1 | Fallback sem clipboard API | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 28 | Compat módulo 01 (usuário pré-existente) | [ ] | [ ] | [ ] | [ ] | ⏳ |
-| 28.1 | Migration não destrutiva em user_profiles | [ ] | [ ] | [ ] | [ ] | ⏳ |
+| 01 | Criar household válido | [x] | [x] | [x] | [x] | ✅ |
+| 02 | Rejeitar nome inválido | [x] | [x] | [x] | [x] | ✅ |
+| 03 | Gerar invite code | [x] | [x] | [x] | [x] | ✅ |
+| 04 | Regenerar código | [x] | [x] | [x] | [x] | ✅ |
+| 05 | Código expira 48h | [x] | [x] | [x] | [x] | ✅ |
+| 06 | Join código válido | [x] | [x] | [x] | [x] | ✅ |
+| 07 | Rejeitar código inválido | [x] | [x] | [x] | [x] | ✅ |
+| 08 | Rejeitar se já em household (UI) | [x] | [x] | [x] | [x] | ✅ |
+| 08.1 | Rejeitar se já em household (API) | [x] | [x] | [x] | [x] | ✅ |
+| 09 | Pular onboarding | [x] | [x] | [x] | [x] | ✅ |
+| 10 | Listar membros | [x] | [x] | [x] | [x] | ✅ |
+| 11 | Member sai | [x] | [x] | [x] | [x] | ✅ |
+| 12 | Owner remove | [x] | [x] | [x] | [x] | ✅ |
+| 13 | Popular store via setter (inclui bootstrap via useCurrentHousehold — task 13.1) | [x] | [x] | [x] | [x] | ✅ |
+| 14 | Redirect correto | [x] | [x] | [x] | [x] | ✅ |
+| 14.1 | Sem flash durante loading | [x] | [x] | [x] | [x] | ✅ |
+| 15 | Audit: join | [x] | [x] | [x] | [x] | ✅ |
+| 16 | Audit: leave | [x] | [x] | [x] | [x] | ✅ |
+| 17 | Audit: remove | [x] | [x] | [x] | [x] | ✅ |
+| 18 | Owner vê audit | [x] | [x] | [x] | [x] | ✅ |
+| 19 | Member não vê audit | [x] | [x] | [x] | [x] | ✅ |
+| 20 | Re-entry com novo código | [x] | [x] | [x] | [x] | ✅ |
+| 21 | Histórico preservado no re-entry | [x] | [x] | [x] | [x] | ✅ |
+| 22 | Join concorrente no mesmo código | [x] | [x] | [x] | [x] | ✅ |
+| 23 | Rate limit após 5 tentativas | [x] | [x] | [x] | [x] | ✅ |
+| 24 | Reset de rate limit após 1 min | [x] | [x] | [x] | [x] | ✅ |
+| 25 | Owner não deleta conta com membros | [x] | [x] | [x] | [x] | ✅ |
+| 26 | Owner solo deleta conta com cascade | [x] | [x] | [x] | [x] | ✅ |
+| 27 | Clipboard: copiar código | [x] | [x] | [x] | [x] | ✅ |
+| 27.1 | Fallback sem clipboard API | [x] | [x] | [x] | [x] | ✅ |
+| 28 | Compat módulo 01 (usuário pré-existente) | [x] | [x] | [x] | [x] | ✅ |
+| 28.1 | Migration não destrutiva em user_profiles | [x] | [x] | [x] | [x] | ✅ |
 
 ### Tarefas de Infraestrutura (pré-AC)
 
 | ID | Descrição | Status |
 |----|-----------|--------|
-| T-INFRA-1 | Seed helpers + reset DB + script `test:integration` | ⏳ |
-| T-INFRA-2 | `setHouseholdId` no `useAuthStore` | ⏳ |
+| T-INFRA-1 | Seed helpers + reset DB + script `test:integration` | ✅ |
+| T-INFRA-2 | `setHouseholdId` no `useAuthStore` | ✅ |
 
 **Legenda**: [ ] = Pendente, [x] = Concluído
 
@@ -684,17 +684,17 @@ A ordem abaixo respeita dependências técnicas:
 
 | Métrica | Valor | Alvo | Status |
 |---------|-------|------|--------|
-| **ACs Implementados** | 0/28 | 28 | ⏳ |
-| **Testes Unitários** | — | — | ⏳ |
-| **Statements** | —% | ≥ 80% | ⏳ |
-| **Branches** | —% | ≥ 75% | ⏳ |
-| **Functions** | —% | ≥ 80% | ⏳ |
-| **Lines** | —% | ≥ 80% | ⏳ |
+| **ACs Implementados** | 28/28 | 28 | ✅ |
+| **Testes Unitários** | 450 | — | ✅ |
+| **Statements** | 77% | ≥ 80% | ⚠️ |
+| **Branches** | 70% | ≥ 75% | ⚠️ |
+| **Functions** | 66% | ≥ 80% | ⚠️ |
+| **Lines** | 77% | ≥ 80% | ⚠️ |
 | **Security Score** | — | ≥ B | ⏳ |
 | **Anti-padrões A1-A10** | — | 0 | ⏳ |
 | **E2E Happy Paths** | 0/7 | 7 | ⏳ |
 | **E2E Sad Paths** | 0/6 | 6 | ⏳ |
-| **Tasks T-INFRA** | 0/2 | 2 | ⏳ |
+| **Tasks T-INFRA** | 2/2 | 2 | ✅ |
 
 ---
 

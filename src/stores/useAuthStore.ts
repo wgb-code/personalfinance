@@ -72,6 +72,18 @@ export interface AuthState {
    * explícito e como reset entre testes.
    */
   reset: () => void;
+
+  /**
+   * Único caminho legítimo para mutar `householdId` (RN-28).
+   *
+   * Componentes e hooks NUNCA devem usar `setState({ householdId })` direto.
+   * Este setter é chamado exclusivamente por:
+   *   - `useCurrentHousehold` após resolver o household do usuário
+   *   - Mutations de onboarding que criam/associam household
+   *
+   * @param id - UUID do household ou `null` para limpar
+   */
+  setHouseholdId: (id: string | null) => void;
 }
 
 const INITIAL_STATE = {
@@ -101,6 +113,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       isAuthenticated: false,
       isInitializing: false,
     }),
+
+  setHouseholdId: (id) => set({ householdId: id }),
 }));
 
 /**

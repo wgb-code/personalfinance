@@ -1,14 +1,15 @@
 /**
- * Testes do componente `AuthBootstrap` (AC-08, AC-09).
+ * Testes do componente `AuthBootstrap` (AC-08, AC-09, AC-13.1).
  *
  * Stack:
  *   - jsdom (project "unit" do Vitest)
  *   - @testing-library/react para renderização e eventos
- *   - Mock de hooks (useInitAuth, useIdleTimer, useLogout)
+ *   - Mock de hooks (useInitAuth, useIdleTimer, useLogout, useCurrentHousehold)
  *
  * Verificações de segurança:
  *   - **Lei 1 (Never trust client)**: sessão vem apenas do SDK Supabase via useInitAuth
  *   - **Lei 14 (Logging)**: logout em onSettled garante limpeza mesmo em falha
+ *   - **RN-28**: householdId via `setHouseholdId`, nunca direto no store
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -28,18 +29,30 @@ vi.mock("@/features/auth/hooks/useLogout", () => ({
   useLogout: vi.fn(),
 }));
 
+vi.mock("@/features/household/hooks/useCurrentHousehold", () => ({
+  useCurrentHousehold: vi.fn(),
+}));
+
 vi.mock("@/stores/useAuthStore", () => ({
   useAuthStore: vi.fn(),
-  selectIsAuthenticated: vi.fn(),
+  selectIsAuthenticated: (state: { isAuthenticated: boolean }) =>
+    state.isAuthenticated,
 }));
 
 import { useInitAuth } from "@/features/auth/hooks/useInitAuth";
 import { useIdleTimer } from "@/features/auth/hooks/useIdleTimer";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useCurrentHousehold } from "@/features/household/hooks/useCurrentHousehold";
 import { useAuthStore } from "@/stores/useAuthStore";
 
-describe("AuthBootstrap — AC-08, AC-09", () => {
+type AuthState = {
+  isAuthenticated: boolean;
+  setHouseholdId: (id: string | null) => void;
+};
+
+describe("AuthBootstrap — AC-08, AC-09, AC-13.1", () => {
   const mockLogout = vi.fn();
+  const mockSetHouseholdId = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -54,7 +67,18 @@ describe("AuthBootstrap — AC-08, AC-09", () => {
       logout: mockLogout,
     });
 
-    (useAuthStore as Mock).mockReturnValue(false);
+    (useCurrentHousehold as Mock).mockReturnValue({
+      isLoading: false,
+      data: null,
+    });
+
+    (useAuthStore as Mock).mockImplementation((selector: (s: AuthState) => unknown) => {
+      const state: AuthState = {
+        isAuthenticated: false,
+        setHouseholdId: mockSetHouseholdId,
+      };
+      return selector(state);
+    });
   });
 
   describe("Estado de inicialização — AC-08", () => {
@@ -228,6 +252,122 @@ describe("AuthBootstrap — AC-08, AC-09", () => {
       );
 
       expect(useLogout).toHaveBeenCalled();
+    });
+  });
+
+  describe("Integração com useCurrentHousehold — AC-13.1", () => {
+    test("deve exibir loading enquanto household está sendo buscado (RN-30.1)", () => {
+      (useInitAuth as Mock).mockReturnValue({
+        isInitializing: false,
+      });
+
+      (useAuthStore as Mock).mockImplementation((selector: (s: AuthState) => unknown) => {
+        const state: AuthState = {
+          isAuthenticated: true,
+          setHouseholdId: mockSetHouseholdId,
+        };
+        return selector(state);
+      });
+
+      (useCurrentHousehold as Mock).mockReturnValue({
+        isLoading: true,
+        data: null,
+      });
+
+      render(
+        <AuthBootstrap>
+          <div>Conteúdo</div>
+        </AuthBootstrap>
+      );
+
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      expect(screen.queryByText("Conteúdo")).not.toBeInTheDocument();
+    });
+
+    test("deve renderizar children após household resolver", async () => {
+      (useInitAuth as Mock).mockReturnValue({
+        isInitializing: false,
+      });
+
+      (useAuthStore as Mock).mockImplementation((selector: (s: AuthState) => unknown) => {
+        const state: AuthState = {
+          isAuthenticated: true,
+          setHouseholdId: mockSetHouseholdId,
+        };
+        return selector(state);
+      });
+
+      (useCurrentHousehold as Mock).mockReturnValue({
+        isLoading: false,
+        data: { household_id: "test-uuid", name: "Casa", role: "owner" },
+      });
+
+      render(
+        <AuthBootstrap>
+          <div>Conteúdo</div>
+        </AuthBootstrap>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Conteúdo")).toBeInTheDocument();
+      });
+    });
+
+    test("deve renderizar children quando usuário não tem household (AC-28)", async () => {
+      (useInitAuth as Mock).mockReturnValue({
+        isInitializing: false,
+      });
+
+      (useAuthStore as Mock).mockImplementation((selector: (s: AuthState) => unknown) => {
+        const state: AuthState = {
+          isAuthenticated: true,
+          setHouseholdId: mockSetHouseholdId,
+        };
+        return selector(state);
+      });
+
+      (useCurrentHousehold as Mock).mockReturnValue({
+        isLoading: false,
+        data: { household_id: null, name: null, role: null },
+      });
+
+      render(
+        <AuthBootstrap>
+          <div>Conteúdo</div>
+        </AuthBootstrap>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Conteúdo")).toBeInTheDocument();
+      });
+    });
+
+    test("NÃO deve buscar household quando não autenticado", () => {
+      (useInitAuth as Mock).mockReturnValue({
+        isInitializing: false,
+      });
+
+      (useAuthStore as Mock).mockImplementation((selector: (s: AuthState) => unknown) => {
+        const state: AuthState = {
+          isAuthenticated: false,
+          setHouseholdId: mockSetHouseholdId,
+        };
+        return selector(state);
+      });
+
+      (useCurrentHousehold as Mock).mockReturnValue({
+        isLoading: false,
+        data: null,
+      });
+
+      render(
+        <AuthBootstrap>
+          <div>Conteúdo</div>
+        </AuthBootstrap>
+      );
+
+      expect(screen.getByText("Conteúdo")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
   });
 });

@@ -4,18 +4,22 @@
  * Responsabilidades:
  *   - AC-08: Inicializa sessão via `useInitAuth`
  *   - AC-09: Monitora inatividade via `useIdleTimer`
+ *   - AC-13.1: Após autenticação, busca `householdId` via `useCurrentHousehold`
  *
- * Enquanto `isInitializing === true`, exibe um spinner centralizado.
- * Após a sessão ser verificada, renderiza os children (rotas).
+ * Enquanto `isInitializing === true` OU (autenticado E household loading),
+ * exibe um spinner centralizado.
+ * Após ambos resolverem, renderiza os children (rotas).
  * Se o usuário ficar 4h inativo, exibe modal e faz logout.
  *
  * Leis de segurança:
  *   - Lei 1: sessão vem APENAS do SDK Supabase via `useInitAuth`
  *   - Lei 14: logout em `onSettled` garante limpeza mesmo em falha
+ *   - RN-28: householdId via `setHouseholdId` (setter controlado)
  */
 import { useState, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 
+import { useCurrentHousehold } from "@/features/household/hooks/useCurrentHousehold";
 import { SessionExpiredModal } from "@/features/auth/components/SessionExpiredModal";
 import { useIdleTimer } from "@/features/auth/hooks/useIdleTimer";
 import { useInitAuth } from "@/features/auth/hooks/useInitAuth";
@@ -27,10 +31,12 @@ interface AuthBootstrapProps {
 }
 
 export function AuthBootstrap({ children }: AuthBootstrapProps) {
-  const { isInitializing } = useInitAuth();
+  const { isInitializing: isAuthLoading } = useInitAuth();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
   const { logout } = useLogout();
   const [showSessionExpired, setShowSessionExpired] = useState(false);
+
+  const { isLoading: isHouseholdLoading } = useCurrentHousehold();
 
   useIdleTimer({
     onIdle: () => {
@@ -44,6 +50,9 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
     setShowSessionExpired(false);
     logout();
   };
+
+  const isInitializing =
+    isAuthLoading || (isAuthenticated && isHouseholdLoading);
 
   if (isInitializing) {
     return (

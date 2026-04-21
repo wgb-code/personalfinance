@@ -21,7 +21,7 @@
  * mexer em 3 arquivos" e dá ao `<ProtectedRoute />` algo concreto para
  * encapsular nos testes/E2E.
  */
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { AuthBootstrap } from "@/features/auth/components/AuthBootstrap";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
@@ -29,31 +29,18 @@ import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { RegisterPage } from "@/features/auth/pages/RegisterPage";
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
+import { OnboardingPage } from "@/features/onboarding/components/OnboardingPage";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-function HomePlaceholder() {
-  // TODO(AC-04): redirecionar para /dashboard ou /onboarding com base
-  // em useAuthStore.householdId.
-  return (
-    <main>
-      <h1>Início</h1>
-    </main>
-  );
+function HomeRedirect() {
+  const householdId = useAuthStore((s) => s.householdId);
+  return <Navigate to={householdId ? "/dashboard" : "/onboarding"} replace />;
 }
 
 function DashboardPlaceholder() {
-  // TODO(modulo 10): substituir por <DashboardPage /> real.
   return (
     <main>
       <h1>Dashboard</h1>
-    </main>
-  );
-}
-
-function OnboardingPlaceholder() {
-  // TODO(modulo 02): substituir por <OnboardingFlow /> real.
-  return (
-    <main>
-      <h1>Onboarding</h1>
     </main>
   );
 }
@@ -93,11 +80,14 @@ export const appRouter = createBrowserRouter([
       { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/reset-password", element: <ResetPasswordPage /> },
       {
-        element: <ProtectedRoute />,
+        element: <ProtectedRoute requiresHousehold={false} />,
+        children: [{ path: "/onboarding", element: <OnboardingPage /> }],
+      },
+      {
+        element: <ProtectedRoute requiresHousehold />,
         children: [
-          { path: "/", element: <HomePlaceholder /> },
+          { path: "/", element: <HomeRedirect /> },
           { path: "/dashboard", element: <DashboardPlaceholder /> },
-          { path: "/onboarding", element: <OnboardingPlaceholder /> },
           { path: "/bills", element: <BillsListPlaceholder /> },
           { path: "/bills/:id", element: <BillDetailPlaceholder /> },
         ],
